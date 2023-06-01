@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import AutoResizeTextarea from '../utils/AutoResizeTextarea';
 import Text from '../utils/Text';
 
