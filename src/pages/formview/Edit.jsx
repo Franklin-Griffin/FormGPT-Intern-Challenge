@@ -4,9 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 // import Sidebar from '../../partials/Sidebar';
 // import MHeader from '../../partials/MHeader';
 import FormCreate from '../../partials/FormCreate';
-import DeleteModal from '../../components/ModalBlank';
-
-import CreatedModal from '../../components/ModalBlank';
+import Modal from '../../components/ModalBlank';
 
 import Copy from '../../images/copy.png';
 
@@ -14,13 +12,14 @@ import post from "../../post.js";
 
 function Edit() {
 
-  // const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { formId } = useParams();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [name, setName] = useState("");
 	const [error, setError] = useState("");
   const [formName, setFormName] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 	const [oldData, setOldData] = useState("");
-  const { formId } = useParams();
+  const [buttonState, setButtonState] = useState(0);
 	const navigate = useNavigate();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
@@ -54,13 +53,16 @@ function Edit() {
   }, []);
 	
 	const handleSubmit = (event) => {
+    setButtonState(1);
 		event.preventDefault();
 		const x = event.target; //shorthand
 		post("/edit", {"name":x.name.value,"goal":x.goal.value,"logo":x.logo.value,"questions":x.questions.value,"initialPrompting":x.initialPrompting.value,"summaryPrompting":x.summaryPrompting.value,"redirect":x.redirect.value||"https://www.google.com/","background":x.background.value,"box":x.box.value,"button":x.button.value,"formId":formId})
     .then((data) => {
       if (!("error" in data)) {
+        setButtonState(2);
         setModalOpen(true);
       } else {
+        setButtonState(0);
         setError(data["error"]);
       }
     });
@@ -112,14 +114,14 @@ function Edit() {
 
               
               {/* Delete form button */}
-              <button className="btn bg-rose-500 hover:bg-rose-600 text-white" aria-controls="delete-modal" onClick={(e) => { e.stopPropagation(); setDeleteModalOpen(true);}} >
+              <button className="btn bg-rose-500 hover:bg-rose-600 text-white" aria-controls="delete-modal" onClick={(e) => { e.stopPropagation(); setModalOpen(true);}} >
                 <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 16 16">
                   <path d="M5 7h2v6H5V7zm4 0h2v6H9V7zm3-6v2h4v2h-1v10c0 .6-.4 1-1 1H2c-.6 0-1-.4-1-1V5H0V3h4V1c0-.6.4-1 1-1h6c.6 0 1 .4 1 1zM6 2v1h4V2H6zm7 3H3v9h10V5z" />
                 </svg>
                 <span className="ml-2">Delete Form</span>
               </button>
 
-              <DeleteModal id="delete-modal" modalOpen={deleteModalOpen} setModalOpen={setDeleteModalOpen} clickOff>
+              <Modal id="delete-modal" modalOpen={deleteModalOpen} setModalOpen={setDeleteModalOpen} clickOff>
                 <div className="p-5 flex space-x-4">
                   {/* Icon */}
                   <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-rose-100">
@@ -141,18 +143,18 @@ function Edit() {
                     </div>
                     {/* Modal footer */}
                     <div className="flex flex-wrap justify-end space-x-2">
-                      <button className="btn-sm border-slate-200 hover:border-slate-300 text-slate-600" onClick={(e) => { e.stopPropagation(); setDeleteModalOpen(false); }}>Never mind</button>
+                      <button className="btn-sm border-slate-200 hover:border-slate-300 text-slate-600" onClick={(e) => { e.stopPropagation(); setModalOpen(false); }}>Never mind</button>
                       <a className="btn-sm bg-rose-500 hover:bg-rose-600 text-white" href={"/delete/"+formId}>Yes, Delete it</a>
                     </div>
                   </div>
                 </div>
-              </DeleteModal>
+              </Modal>
             
             </div>
 
-						{oldData === "" ?  <h1 className="text-2xl md:text-3xl text-slate-800 font-bold">Loading...</h1> : <FormCreate handleSubmit={handleSubmit} values={oldData} error={error} />}
+						{oldData === "" ?  <h1 className="text-2xl md:text-3xl text-slate-800 font-bold">Loading...</h1> : <FormCreate handleSubmit={handleSubmit} values={oldData} error={error} buttonState={buttonState} />}
 
-            <CreatedModal id="success-modal" modalOpen={modalOpen} setModalOpen={setModalOpen}>
+            <Modal id="success-modal" modalOpen={modalOpen} setModalOpen={setModalOpen}>
               <div className="p-5 flex space-x-4">
                 {/* Icon */}
                 <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-emerald-100">
@@ -178,7 +180,7 @@ function Edit() {
                   </div>
                 </div>
               </div>
-            </CreatedModal>
+            </Modal>
           
           </div>
 

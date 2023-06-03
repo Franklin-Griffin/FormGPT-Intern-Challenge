@@ -13,13 +13,14 @@ import post from "../post.js";
 
 function Create() {
 
-  // const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [name, setName] = useState("");
 	const [error, setError] = useState("");
   const [redirect, setRedirect] = useState("");
   const [doRedirect, setDoRedirect] = useState(false);
   const [userId, setUserId] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [buttonState, setButtonState] = useState(0);
 	const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,14 +44,17 @@ function Create() {
   }, []);
 	
 	const handleSubmit = (event) => {
+    setButtonState(1);
 		event.preventDefault();
 		const x = event.target; //shorthand
 		post("/createForm", {"name":x.name.value,"goal":x.goal.value,"logo":x.logo.value,"questions":x.questions.value,"initialPrompting":x.initialPrompting.value,"summaryPrompting":x.summaryPrompting.value,"nps":x.nps.checked,"redirect":x.redirect.value||"https://www.google.com/","user_id":userId,"table":x.table.value,"background":x.background.value,"box":x.box.value,"button":x.button.value})
     .then((data) => {
       if ("id" in data) {
+        setButtonState(2);
         setRedirect(data["id"]);
         setModalOpen(true);
       } else {
+        setButtonState(0);
         setError(data["error"]);
       }
     });
@@ -93,7 +97,7 @@ function Create() {
             
             </div>
 
-            <FormCreate handleSubmit={handleSubmit} error={error} values={[]} />
+            <FormCreate handleSubmit={handleSubmit} error={error} values={[]} buttonState={buttonState} />
 
             <CreatedModal id="success-modal" modalOpen={modalOpen} setModalOpen={setModalOpen}>
               <div className="p-5 flex space-x-4">
